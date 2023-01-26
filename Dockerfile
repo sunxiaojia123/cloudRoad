@@ -10,4 +10,4 @@ WORKDIR /app
 COPY --from=0 /go/src/cloudRoad/main ./
 COPY --from=0 /go/src/cloudRoad/config ./
 EXPOSE 8080
-ENTRYPOINT [ "main" ]
+ENTRYPOINT [ "./main" ]
