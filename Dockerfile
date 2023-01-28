@@ -7,8 +7,8 @@ RUN CGO_ENABLE=0 GOOS=linux GOARCH=amd64 go build -o main .
 
 FROM alpine:latest
 RUN mkdir /app
-WORKDIR /app
 COPY --from=builder /build/main /app/
 COPY --from=builder /build/config /app/
+WORKDIR /app
 EXPOSE 8080
 ENTRYPOINT [ "./main" ]
