@@ -1,11 +1,29 @@
-FROM golang:1.18 AS builder
-ADD ./ /go/src/build/
-WORKDIR /go/src/build
-RUN go env -w GOPROXY=https://proxy.golang.com.cn,https://goproxy.cn,direct
-RUN CGO_ENABLE=0 GOOS=linux GOARCH=amd64 go build -o main .
+FROM golang:alpine AS builder
 
-FROM alpine:latest
-WORKDIR /app/
-COPY --from=builder /go/src/build/app ./
-EXPOSE 8080
-ENTRYPOINT [ "./main" ]
+# 为我们的镜像设置必要的环境变量
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+RUN go env -w GOPROXY=https://proxy.golang.com.cn,https://goproxy.cn,direct
+
+# 移动到工作目录：/build
+WORKDIR /build
+
+# 将代码复制到容器中
+COPY . .
+
+# 将我们的代码编译成二进制可执行文件 app
+RUN go build -o app .
+
+###################
+# 接下来创建一个小镜像
+###################
+FROM scratch
+
+# 从builder镜像中把/dist/app 拷贝到当前目录
+COPY --from=builder /build/app /
+
+# 需要运行的命令
+ENTRYPOINT ["/app"]
+
